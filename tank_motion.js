@@ -22,25 +22,9 @@ function showTank(container, tank) {
     container.appendChild(tankElement)
 }
 
-function handleEvents(keymap, container, tank) {
-    window.addEventListener('keydown', event => {
-        switch(Object.keys(keymap).find(key => keymap[key].includes(event.key))) {
-            case 'RIGHT':
-                tank.rotation += tank.rotationSpeed
-            break
-            case 'LEFT':
-                tank.rotation -= tank.rotationSpeed
-            break
-            case 'UP':
-                moveTank(tank, -tank.speed)
-            break
-            case 'DOWN':
-                moveTank(tank, tank.speed)
-            break
-        }
-
-        showTank(container, tank)
-    })
+function handleEvents(keymap, tank) {
+    window.addEventListener('keydown', event => tank.moves.add(Object.keys(keymap).find(key => keymap[key].includes(event.key))))
+    window.addEventListener('keyup', event => tank.moves.delete(Object.keys(keymap).find(key => keymap[key].includes(event.key))))
 }
 
 function moveTank(tank, moveBy) {
@@ -67,11 +51,23 @@ function init() {
         speed: 5,
         rotation: 0,
         rotationSpeed: 5,
+        moves: new Set(),
         src: 'tank_model.jpg'
     }
+
+    let FPS = 60
     
     showTank(container, tank)
-    handleEvents(keymap, container, tank)
+    handleEvents(keymap, tank)
+
+    setInterval(() => {
+        if(tank.moves.has('RIGHT')) tank.rotation += tank.rotationSpeed
+        if(tank.moves.has('LEFT')) tank.rotation -= tank.rotationSpeed
+        if(tank.moves.has('UP')) moveTank(tank, -tank.speed)
+        if(tank.moves.has('DOWN')) moveTank(tank, tank.speed)
+
+        showTank(container, tank)
+    }, 1000 / FPS);
 }
 
 init()
